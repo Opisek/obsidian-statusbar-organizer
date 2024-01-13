@@ -1,11 +1,10 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "obsidian-statusbar-organizer",
+	"name": "Status Bar Organizer",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
-	"isDesktopOnly": false
+	"description": "Lets you rearrange and hide specific status bar elements.",
+	"author": "Kacper Darowski",
+	"authorUrl": "https://opisek.net/",
+	"isDesktopOnly": true
 }

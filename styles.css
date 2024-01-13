@@ -6,3 +6,46 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+div.statusbarOrganizerEntriesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  padding: 1em;
+  width: 100%;
+}
+
+div.statusbarOrganizerEntry {
+  background: #111111;
+  border-radius: 0.25em;
+  display: grid;
+  grid-template-columns: 1.5em auto 4em;
+  padding: 0.5em 1em;
+  width: 100%;
+}
+
+div.statusbarOrganizerEntry > span {
+  display: inline-block;
+  height: 1.75em;
+  line-height: 0.7;
+  padding: 0.5em 0em;
+}
+
+span.statusbarOrganizerHandle {
+  padding: 0 !important;
+}
+
+span.statusbarOrganizerHandle::after {
+  content: '.. .. .. ..';
+  cursor: move;
+  display: inline-block;
+  height: 1.75em;
+  line-height: 0.25rem;
+  padding: 0.1em 0em;
+  width: 1em;
+  word-wrap: normal;
+}
+
+span.statusbarOrganizerVisibility {
+  cursor: pointer;
+  text-align: right;
+}
