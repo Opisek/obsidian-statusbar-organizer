@@ -32,11 +32,11 @@ div.statusbarOrganizerEntry > span {
 
 span.statusbarOrganizerHandle {
   padding: 0 !important;
+  cursor: move;
 }
 
 span.statusbarOrganizerHandle::after {
   content: '.. .. .. ..';
-  cursor: move;
   display: inline-block;
   height: 1.75em;
   line-height: 0.25rem;
@@ -48,4 +48,24 @@ span.statusbarOrganizerHandle::after {
 span.statusbarOrganizerVisibility {
   cursor: pointer;
   text-align: right;
+}
+
+div.statusbarOrganizerHidden {
+  height: 0;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  visibility: hidden;
+  width: 0;
+}
+
+div.statusbarOrganizerDrag {
+  position: fixed;
+  color: #dddddd;
+  background: #333333;
+}
+
+div.statusbarOrganizerClone {
+  color: #999999;
+  background: #222222;
 }
