@@ -66,6 +66,7 @@ div.statusbarOrganizerHidden {
   padding: 0;
   visibility: hidden;
   width: 0;
+  display: none;
 }
 
 div.statusbarOrganizerDrag {
