@@ -6,7 +6,7 @@ This plugin enables you to easily reorder elements of the status bar, as well as
 Once installed, simply enable the plugin and head to the "Status Bar Organizer" settings page.
 
 You'll see an entry per each element of the status bar.
-Using he handle on the left side, you can drag and drop to change the order.
+Using the handle on the left side, you can drag and drop to change the order.
 Using the eye on the right side, you can toggle visibility of the elemente.
 
 The changes you'll make will persist, even after restarting Obsidian.
