@@ -16,3 +16,5 @@ The changes you make will persist, even after restarting Obsidian.
 ## Deleting Plugins
 If you delete some plugin which has a status bar element, its position will be remembered and will still be displayed on the settings page.
 You can, however, simply click on the trash can symbol (where the visibility toggle previously was) to delete that entry.
+
+![image](https://github.com/Opisek/obsidian-statusbar-organizer/assets/40141286/bc0b4f81-dddf-4cb4-bc57-9d0f9459e8ab)
