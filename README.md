@@ -11,6 +11,8 @@ Using the eye on the right side, you can toggle visibility of the elemente.
 
 The changes you'll make will persist, even after restarting Obsidian.
 
+![statusbar-organizer-example](https://github.com/Opisek/obsidian-statusbar-organizer/assets/40141286/677fd704-1302-48cd-b849-3718c2a715d7)
+
 ## Deleting Plugins
 If you delete some plugin which has a status bar element, its position will be remembered and will still be displayed on the settings page.
 You can, however, simply click on the trash can symbol (where the visibility toggle previously was) to delete that entry.
