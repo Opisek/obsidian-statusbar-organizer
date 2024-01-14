@@ -18,7 +18,7 @@ div.statusbarOrganizerEntry {
   background: #111111;
   border-radius: 0.25em;
   display: grid;
-  grid-template-columns: 1.5em auto 4em;
+  grid-template-columns: 1.5em 1fr 1fr 4em;
   padding: 0.5em 1em;
   width: 100%;
 }
@@ -43,6 +43,14 @@ span.statusbarOrganizerHandle::after {
   padding: 0.1em 0em;
   width: 1em;
   word-wrap: normal;
+}
+
+span.statusbarOrganizerPreview {
+  border-radius: 0.25em;
+  margin-top: 0.2em;
+  padding: 0.5em !important;
+  font-size: 0.8rem;
+  background: #ffffff10;
 }
 
 span.statusbarOrganizerVisibility {

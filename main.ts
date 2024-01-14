@@ -226,10 +226,10 @@ class StatusBarSettingTab extends PluginSettingTab {
       if (statusBarElement.element) {
         if (status.visible = !status.visible) {
           statusBarElement.element.removeClass("statusbarOrganizerHidden");
-          setIcon((statusBarElement.entry as HTMLDivElement).children[2] as HTMLElement, "eye");
+          setIcon((statusBarElement.entry as HTMLDivElement).children[3] as HTMLElement, "eye");
         } else {
           statusBarElement.element.addClass("statusbarOrganizerHidden");
-          setIcon((statusBarElement.entry as HTMLDivElement).children[2] as HTMLElement, "eye-off");
+          setIcon((statusBarElement.entry as HTMLDivElement).children[3] as HTMLElement, "eye-off");
         }
       }
       
@@ -380,6 +380,13 @@ class StatusBarSettingTab extends PluginSettingTab {
       const titleSpan = document.createElement("span");
       titleSpan.innerHTML = formattedName;
       entry.appendChild(titleSpan);
+
+      const previewSpan = document.createElement("span");
+      previewSpan.addClass("statusbarOrganizerPreview");
+      if (currentStatus.exists) {
+        previewSpan.innerHTML = (statusBarElement.element as Element).innerHTML;
+      }
+      entry.appendChild(previewSpan);
 
       const visibilitySpan = document.createElement("span");
       visibilitySpan.addClass("statusbarOrganizerVisibility");
