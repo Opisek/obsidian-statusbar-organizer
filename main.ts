@@ -20,7 +20,7 @@ type StatusBarElement = {
   name: string;
   index: number;
   id: string;
-  element: Element;
+  element?: Element;
   entry?: HTMLDivElement;
 };
 
@@ -28,6 +28,21 @@ type StatusBarElementStatus = {
   position: number;
   visible: boolean;
   exists: boolean;
+}
+
+function generateId(name: string, index: number): string {
+  return `${name};${index}`;
+}
+
+function parseId(id: string): { name: string, index: number } {
+  const parts = id.split(';');
+  const index = Number.parseInt(parts.pop() as string);
+  const name = parts.join(';');
+
+  return {
+    name: name,
+    index: index
+  };
 }
 
 function getStatusBarElements(): StatusBarElement[] {
@@ -49,12 +64,12 @@ function getStatusBarElements(): StatusBarElement[] {
           ? pluginElementCount[name] + 1
           : 1;
 
-      id = `${name};${index}`;
+      id = generateId(name, index);
       element.setAttribute("data-statusbar-organizer-id", id);
     } else {
-      const parts = id.split(';');
-      index = Number.parseInt(parts.pop() as string);
-      name = parts.join(';');
+      const parsed = parseId(id);
+      name = parsed.name;
+      index = parsed.index;
     }
 
     pluginElementCount[name] = Math.max(
@@ -75,10 +90,42 @@ function getStatusBarElements(): StatusBarElement[] {
   return elements;
 }
 
+function fixOrder(status: { [key: string]: StatusBarElementStatus }) {
+  const elements = getStatusBarElements();
+  const statusBar = document.getElementsByClassName("status-bar")[0];
+
+  const known = [];
+  const orphans = [];
+
+  for (const element of elements) {
+    if (element.id in status) {
+      const myStatus = status[element.id];
+      known.push([element, myStatus.position]);
+      if (myStatus.visible)
+        (element.element as HTMLDivElement).removeClass("statusbarOrganizerHidden");
+      else
+        (element.element as HTMLDivElement).addClass("statusbarOrganizerHidden");
+    } else {
+      orphans.push(element.element);
+    }
+  }
+
+  const orderedElements = known
+    .sort((a: [any, number], b: [any, number]) => a[1] - b[1])
+    .map((x: [StatusBarElement, any]) => x[0].element);
+
+  const allElements = orderedElements.concat(orphans);
+
+  statusBar.innerHTML = "";
+  for (const element of allElements) statusBar.appendChild(element as HTMLElement);
+}
+
 interface StatusBarOrganizerSettings {
+  status: { [key: string]: StatusBarElementStatus };
 }
 
 const DEFAULT_SETTINGS: StatusBarOrganizerSettings = {
+  status: {}
 }
 
 export default class StatusBarOrganizer extends Plugin {
@@ -86,14 +133,11 @@ export default class StatusBarOrganizer extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-
 		this.addSettingTab(new StatusBarSettingTab(this.app, this));
 
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
-		});
-
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+    setTimeout(() => {
+      fixOrder(this.settings.status);
+    }, 1000);
 	}
 
 	onunload() {
@@ -117,7 +161,7 @@ class StatusBarSettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
-	display(): void {
+	async display(): Promise<void> {
     // Set up layout
 		const {containerEl} = this;
 
@@ -128,32 +172,85 @@ class StatusBarSettingTab extends PluginSettingTab {
     containerEl.appendChild(entriesContainer);
 
     // Initialize status
-    const statusBarElements = getStatusBarElements();
-    const elementStatus: { [key: string]: StatusBarElementStatus } = {};
-    for (const [index, statusBarElement] of statusBarElements.entries()) {
-      elementStatus[statusBarElement.id] = {
+    const loadedElementStatus: { [key: string]: StatusBarElementStatus } = this.plugin.settings.status;
+
+    const unorderedStatusBarElements = getStatusBarElements();
+    const defaultElementStatus: { [key: string]: StatusBarElementStatus } = {};
+    for (const [index, statusBarElement] of unorderedStatusBarElements.entries()) {
+      defaultElementStatus[statusBarElement.id] = {
         position: index,
         visible: true,
         exists: true
       };
     }
 
+    const elementStatus: { [key: string]: StatusBarElementStatus } = {};
+    for (const [index, status] of Object.entries(loadedElementStatus)) {
+      status.exists = index in defaultElementStatus;
+      elementStatus[index] = status; 
+    }
+    let insertPosition = Object.keys(elementStatus).length + 1;
+    for (const element of unorderedStatusBarElements) {
+      if (element.id in elementStatus) continue;
+      const status = defaultElementStatus[element.id];
+      status.position = insertPosition++;
+      elementStatus[element.id] = status;
+    }
+
+    const disabledStatusBarElements: StatusBarElement[] = Object.keys(loadedElementStatus)
+      .filter(x => !elementStatus[x].exists)
+      .map(x => {
+        const parsed = parseId(x);
+        return {
+          name: parsed.name,
+          index: parsed.index,
+          id: x
+        };
+      });
+
+    const statusBarElements: StatusBarElement[] = unorderedStatusBarElements
+      .concat(disabledStatusBarElements)
+      .map(x => [x, elementStatus[x.id].position])
+      .sort((a: [any, number], b: [any, number]) => a[1] - b[1])
+      .map((x: [StatusBarElement, any]) => x[0]);
+
+    fixOrder(elementStatus);
+
+    this.plugin.settings.status = elementStatus;
+    await this.plugin.saveSettings();
+
     // Functions
-    function toggleVisibility(statusBarElement: StatusBarElement) {
+    async function toggleVisibility(statusBarElement: StatusBarElement, plugin: StatusBarOrganizer) {
       const status = elementStatus[statusBarElement.id];
 
-      if (status.visible = !status.visible) {
-        statusBarElement.element.removeClass("statusbarOrganizerHidden");
-        setIcon((statusBarElement.entry as HTMLDivElement).children[2] as HTMLElement, "eye");
-      } else {
-        statusBarElement.element.addClass("statusbarOrganizerHidden");
-        setIcon((statusBarElement.entry as HTMLDivElement).children[2] as HTMLElement, "eye-off");
+      if (statusBarElement.element) {
+        if (status.visible = !status.visible) {
+          statusBarElement.element.removeClass("statusbarOrganizerHidden");
+          setIcon((statusBarElement.entry as HTMLDivElement).children[2] as HTMLElement, "eye");
+        } else {
+          statusBarElement.element.addClass("statusbarOrganizerHidden");
+          setIcon((statusBarElement.entry as HTMLDivElement).children[2] as HTMLElement, "eye-off");
+        }
       }
+      
+      plugin.settings.status = elementStatus;
+      await plugin.saveSettings();
+    }
+
+    async function removeOrphan(statusBarElement: StatusBarElement, plugin: StatusBarOrganizer) {
+      entriesContainer.removeChild(statusBarElement.entry as HTMLDivElement);      
+      delete elementStatus[statusBarElement.id];
+
+      for (const [entryIndex, entry] of Array.from(entriesContainer.children).entries())
+        elementStatus[entry.getAttribute("data-statusbar-organizer-id") as string].position = entryIndex;
+
+      plugin.settings.status = elementStatus;
+      await plugin.saveSettings();
     }
 
     let dragging = false;
 
-    function handleMouseDown(statusBarElement: StatusBarElement, event: MouseEvent) {
+    function handleMouseDown(statusBarElement: StatusBarElement, event: MouseEvent, plugin: StatusBarOrganizer) {
       if (dragging) return;
       dragging = true;
 
@@ -204,10 +301,12 @@ class StatusBarSettingTab extends PluginSettingTab {
 
             const statusBar = document.getElementsByClassName("status-bar")[0];
             if (statusBarChangeRequired) {
-              statusBar.removeChild(statusBarElement.element)
+              statusBar.removeChild(statusBarElement.element as HTMLDivElement)
               const passedElement = statusBarElements.filter(x => x.id == passedId)[0].element;
-              if (dir > 0) statusBar.insertAfter(statusBarElement.element, passedElement);
-              else statusBar.insertBefore(statusBarElement.element, passedElement);
+              if (dir > 0)
+                statusBar.insertAfter(statusBarElement.element as HTMLDivElement, passedElement as HTMLDivElement);
+              else
+                statusBar.insertBefore(statusBarElement.element as HTMLDivElement, passedElement as HTMLDivElement);
             }
 
 						entriesContainer.removeChild(realEntry);
@@ -219,7 +318,7 @@ class StatusBarSettingTab extends PluginSettingTab {
 						index = newIndex;
 
             for (const [entryIndex, entry] of Array.from(entriesContainer.children).entries())
-              elementStatus[entry.children[1].innerHTML].position = entryIndex;
+              elementStatus[entry.getAttribute("data-statusbar-organizer-id") as string].position = entryIndex;
 					}
 				}
       }
@@ -227,7 +326,7 @@ class StatusBarSettingTab extends PluginSettingTab {
       window.addEventListener('mousemove', handleMouseMove); 
 
       // Handle release
-      function handleMouseUp(event: MouseEvent) {
+      async function handleMouseUp(event: MouseEvent) {
         realEntry.removeClass("statusbarOrganizerClone");
         containerEl.removeChild(fauxEntry);
 
@@ -235,6 +334,9 @@ class StatusBarSettingTab extends PluginSettingTab {
 
         window.removeEventListener('mouseup', handleMouseUp);
         window.removeEventListener('mousemove', handleMouseMove);
+
+		    plugin.settings.status = elementStatus;
+        await plugin.saveSettings();
       }
       window.addEventListener('mouseup', handleMouseUp);
     }
@@ -261,7 +363,7 @@ class StatusBarSettingTab extends PluginSettingTab {
       
       const handle = document.createElement("span");
       handle.addClass("statusbarOrganizerHandle");
-      handle.addEventListener("mousedown", (event) => handleMouseDown(statusBarElement, event));
+      handle.addEventListener("mousedown", (event) => handleMouseDown(statusBarElement, event, this.plugin));
       entry.appendChild(handle);
 
       const formattedName = statusBarElement.name
@@ -281,20 +383,12 @@ class StatusBarSettingTab extends PluginSettingTab {
 
       const visibilitySpan = document.createElement("span");
       visibilitySpan.addClass("statusbarOrganizerVisibility");
-      visibilitySpan.onclick = (() => toggleVisibility(statusBarElement));
-      setIcon(visibilitySpan, currentStatus.visible ? "eye" : "no-eye");
+      visibilitySpan.onclick = (() => {
+        if (currentStatus.exists) toggleVisibility(statusBarElement, this.plugin);
+        else removeOrphan(statusBarElement, this.plugin);
+      });
+      setIcon(visibilitySpan, currentStatus.exists ? (currentStatus.visible ? "eye" : "eye-off") : "trash-2");
       entry.appendChild(visibilitySpan);
     }
-
-		// new Setting(containerEl)
-		// 	.setName('Setting #1')
-		// 	.setDesc('It\'s a secret')
-		// 	.addText(text => text
-		// 		.setPlaceholder('Enter your secret')
-		// 		.setValue('test')
-		// 		.onChange(async (value) => {
-		// 			//this.plugin.settings.mySetting = value;
-		// 			await this.plugin.saveSettings();
-		// 		}));
 	}
 }
