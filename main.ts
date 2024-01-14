@@ -3,12 +3,13 @@ import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Set
 const ignoredClasses = [
   "mod-clickable",
   "status-bar-item",
-  "statusBarOrganizerSettingsHidden"
+  "statusBarOrganizerHidden"
 ];
 
 type StatusBarElement = {
   name: string;
   index: number;
+  id: string;
   element: Element;
   entry?: HTMLDivElement;
 };
@@ -16,6 +17,7 @@ type StatusBarElement = {
 type StatusBarElementStatus = {
   position: number;
   visible: boolean;
+  exists: boolean;
 }
 
 function getStatusBarElements(): StatusBarElement[] {
@@ -24,21 +26,38 @@ function getStatusBarElements(): StatusBarElement[] {
   const pluginElementCount: { [key: string]: number } = {};
 
   Array.from(statusBar.children).forEach(element => {
-    const name = Array
-      .from(element.classList)
-      .filter(x => !ignoredClasses.contains(x))
-      .join('-');
+    let id = element.getAttribute("data-statusbar-organizer-id");
+    let name, index;
+    if (id == null) {
+      name = Array
+        .from(element.classList)
+        .filter(x => !ignoredClasses.contains(x))
+        .join('-');
 
-    let index =
-      (name in pluginElementCount)
-        ? pluginElementCount[name] + 1
-        : 1;
+      index =
+        (name in pluginElementCount)
+          ? pluginElementCount[name] + 1
+          : 1;
 
-    pluginElementCount[name] = index;
+      id = `${name};${index}`;
+      element.setAttribute("data-statusbar-organizer-id", id);
+    } else {
+      const parts = id.split(';');
+      index = Number.parseInt(parts.pop() as string);
+      name = parts.join(';');
+    }
+
+    pluginElementCount[name] = Math.max(
+      index,
+      name in pluginElementCount
+        ? pluginElementCount[name]
+        : 0
+    );
 
     elements.push({
       name: name,
       index: index,
+      id: id,
       element: element
     });
   });
@@ -102,15 +121,16 @@ class StatusBarSettingTab extends PluginSettingTab {
     const statusBarElements = getStatusBarElements();
     const elementStatus: { [key: string]: StatusBarElementStatus } = {};
     for (const [index, statusBarElement] of statusBarElements.entries()) {
-      elementStatus[statusBarElement.name] = {
+      elementStatus[statusBarElement.id] = {
         position: index,
-        visible: true
+        visible: true,
+        exists: true
       };
     }
 
     // Functions
     function toggleVisibility(statusBarElement: StatusBarElement) {
-      const status = elementStatus[statusBarElement.name];
+      const status = elementStatus[statusBarElement.id];
 
       if (status.visible = !status.visible)
         statusBarElement.element.removeClass("statusbarOrganizerHidden");
@@ -163,6 +183,20 @@ class StatusBarSettingTab extends PluginSettingTab {
 
 					var newIndex = Math.max(0, Math.min(index + dir, entriesContainer.children.length - 1));
 					if (newIndex != index) {
+            const passedEntry = entriesContainer.children[newIndex];
+            const passedId = passedEntry.getAttribute("data-statusbar-organizer-id");
+            const statusBarChangeRequired =
+              elementStatus[statusBarElement.id].exists &&
+              elementStatus[passedId as string].exists;
+
+            const statusBar = document.getElementsByClassName("status-bar")[0];
+            if (statusBarChangeRequired) {
+              statusBar.removeChild(statusBarElement.element)
+              const passedElement = statusBarElements.filter(x => x.id == passedId)[0].element;
+              if (dir > 0) statusBar.insertAfter(statusBarElement.element, passedElement);
+              else statusBar.insertBefore(statusBarElement.element, passedElement);
+            }
+
 						entriesContainer.removeChild(realEntry);
 						if (newIndex != entriesContainer.children.length)
               entriesContainer.insertBefore(realEntry, entriesContainer.children[newIndex]);
@@ -170,6 +204,9 @@ class StatusBarSettingTab extends PluginSettingTab {
               entriesContainer.appendChild(realEntry);
 
 						index = newIndex;
+
+            for (const [entryIndex, entry] of Array.from(entriesContainer.children).entries())
+              elementStatus[entry.children[1].innerHTML].position = entryIndex;
 					}
 				}
       }
@@ -193,6 +230,7 @@ class StatusBarSettingTab extends PluginSettingTab {
     for (const statusBarElement of statusBarElements) {
       const entry = document.createElement("div");
       entry.addClass("statusbarOrganizerEntry");
+      entry.setAttribute("data-statusbar-organizer-id", statusBarElement.id);
       statusBarElement.entry = entry;
       entriesContainer.appendChild(entry);
       
