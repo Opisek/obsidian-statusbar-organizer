@@ -1,4 +1,14 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import {
+  App,
+  Editor,
+  MarkdownView,
+  Modal,
+  Notice,
+  Plugin,
+  PluginSettingTab,
+  Setting,
+  setIcon
+} from 'obsidian';
 
 const ignoredClasses = [
   "mod-clickable",
@@ -132,10 +142,13 @@ class StatusBarSettingTab extends PluginSettingTab {
     function toggleVisibility(statusBarElement: StatusBarElement) {
       const status = elementStatus[statusBarElement.id];
 
-      if (status.visible = !status.visible)
+      if (status.visible = !status.visible) {
         statusBarElement.element.removeClass("statusbarOrganizerHidden");
-      else
+        setIcon((statusBarElement.entry as HTMLDivElement).children[2] as HTMLElement, "eye");
+      } else {
         statusBarElement.element.addClass("statusbarOrganizerHidden");
+        setIcon((statusBarElement.entry as HTMLDivElement).children[2] as HTMLElement, "eye-off");
+      }
     }
 
     let dragging = false;
@@ -226,10 +239,22 @@ class StatusBarSettingTab extends PluginSettingTab {
       window.addEventListener('mouseup', handleMouseUp);
     }
 
+    // Check name collisions
+    const nameCollisions: { [key: string]: number } = {};
+    for (const element of statusBarElements) {
+      if (element.name in nameCollisions)
+        nameCollisions[element.name]++;
+      else
+        nameCollisions[element.name] = 0;
+    }
+    
     // Generate entries
     for (const statusBarElement of statusBarElements) {
+      const currentStatus = elementStatus[statusBarElement.id];
+
       const entry = document.createElement("div");
       entry.addClass("statusbarOrganizerEntry");
+      if (!currentStatus.exists) entry.addClass("statusbarOrganizerDisabled");
       entry.setAttribute("data-statusbar-organizer-id", statusBarElement.id);
       statusBarElement.entry = entry;
       entriesContainer.appendChild(entry);
@@ -239,14 +264,25 @@ class StatusBarSettingTab extends PluginSettingTab {
       handle.addEventListener("mousedown", (event) => handleMouseDown(statusBarElement, event));
       entry.appendChild(handle);
 
+      const formattedName = statusBarElement.name
+        .replace(/^plugin-(obsidian-)?/,'')
+        .split('-')
+        .map(x => x.charAt(0).toUpperCase() + x.slice(1))
+        .join(' ')
+        + (
+          nameCollisions[statusBarElement.name]
+            ? ` (${statusBarElement.index})`
+            : ''
+        );
+
       const titleSpan = document.createElement("span");
-      titleSpan.innerHTML = `${statusBarElement.name} (${statusBarElement.index})`;
+      titleSpan.innerHTML = formattedName;
       entry.appendChild(titleSpan);
 
       const visibilitySpan = document.createElement("span");
       visibilitySpan.addClass("statusbarOrganizerVisibility");
-      visibilitySpan.innerHTML = "👁";
       visibilitySpan.onclick = (() => toggleVisibility(statusBarElement));
+      setIcon(visibilitySpan, currentStatus.visible ? "eye" : "no-eye");
       entry.appendChild(visibilitySpan);
     }
 

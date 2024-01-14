@@ -46,6 +46,7 @@ span.statusbarOrganizerHandle::after {
 }
 
 span.statusbarOrganizerVisibility {
+  padding-top: 0.3em !important;
   cursor: pointer;
   text-align: right;
 }
@@ -68,4 +69,9 @@ div.statusbarOrganizerDrag {
 div.statusbarOrganizerClone {
   color: #999999;
   background: #222222;
+}
+
+div.statusbarOrganizerDisabled {
+  color: #777777;
+  background: #050505;
 }
