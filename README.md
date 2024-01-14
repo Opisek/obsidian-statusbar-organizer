@@ -9,7 +9,7 @@ You'll see an entry per each element of the status bar.
 Using the handle on the left side, you can drag and drop to change the order.
 Using the eye on the right side, you can toggle visibility of the elemente.
 
-The changes you'll make will persist, even after restarting Obsidian.
+The changes you make will persist, even after restarting Obsidian.
 
 ![statusbar-organizer-example](https://github.com/Opisek/obsidian-statusbar-organizer/assets/40141286/677fd704-1302-48cd-b849-3718c2a715d7)
 
