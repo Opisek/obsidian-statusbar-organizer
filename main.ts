@@ -13,7 +13,7 @@ import {
 const ignoredClasses = [
   "mod-clickable",
   "status-bar-item",
-  "statusBarOrganizerHidden"
+  "statusbar-organizer-hidden"
 ];
 
 type StatusBarElement = {
@@ -102,9 +102,9 @@ function fixOrder(status: { [key: string]: StatusBarElementStatus }) {
       const myStatus = status[element.id];
       known.push([element, myStatus.position]);
       if (myStatus.visible)
-        (element.element as HTMLDivElement).removeClass("statusbarOrganizerHidden");
+        (element.element as HTMLDivElement).removeClass("statusbar-organizer-hidden");
       else
-        (element.element as HTMLDivElement).addClass("statusbarOrganizerHidden");
+        (element.element as HTMLDivElement).addClass("statusbar-organizer-hidden");
     } else {
       orphans.push(element.element);
     }
@@ -168,7 +168,7 @@ class StatusBarSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
     const entriesContainer = document.createElement("div");
-    entriesContainer.addClass("statusbarOrganizerEntriesContainer");
+    entriesContainer.addClass("statusbar-organizer-container");
     containerEl.appendChild(entriesContainer);
 
     // Initialize status
@@ -225,10 +225,10 @@ class StatusBarSettingTab extends PluginSettingTab {
 
       if (statusBarElement.element) {
         if (status.visible = !status.visible) {
-          statusBarElement.element.removeClass("statusbarOrganizerHidden");
+          statusBarElement.element.removeClass("statusbar-organizer-hidden");
           setIcon((statusBarElement.entry as HTMLDivElement).children[3] as HTMLElement, "eye");
         } else {
-          statusBarElement.element.addClass("statusbarOrganizerHidden");
+          statusBarElement.element.addClass("statusbar-organizer-hidden");
           setIcon((statusBarElement.entry as HTMLDivElement).children[3] as HTMLElement, "eye-off");
         }
       }
@@ -256,13 +256,13 @@ class StatusBarSettingTab extends PluginSettingTab {
 
       // Modify real element
       const realEntry = statusBarElement.entry as HTMLDivElement;
-      realEntry.addClass("statusbarOrganizerClone");
+      realEntry.addClass("statusbar-organizer-clone");
 
       // Create faux element
       const fauxEntry = document.createElement("div");
 
-      fauxEntry.addClass("statusbarOrganizerEntry");
-      fauxEntry.addClass("statusbarOrganizerDrag");
+      fauxEntry.addClass("statusbar-organizer-entry");
+      fauxEntry.addClass("statusbar-organizer-drag");
       containerEl.appendChild(fauxEntry);
 
       fauxEntry.style.left = realEntry.getBoundingClientRect().left + 'px';
@@ -327,7 +327,7 @@ class StatusBarSettingTab extends PluginSettingTab {
 
       // Handle release
       async function handleMouseUp(event: MouseEvent) {
-        realEntry.removeClass("statusbarOrganizerClone");
+        realEntry.removeClass("statusbar-organizer-clone");
         containerEl.removeChild(fauxEntry);
 
         dragging = false;
@@ -355,14 +355,14 @@ class StatusBarSettingTab extends PluginSettingTab {
       const currentStatus = elementStatus[statusBarElement.id];
 
       const entry = document.createElement("div");
-      entry.addClass("statusbarOrganizerEntry");
-      if (!currentStatus.exists) entry.addClass("statusbarOrganizerDisabled");
+      entry.addClass("statusbar-organizer-entry");
+      if (!currentStatus.exists) entry.addClass("statusbar-organizer-disabled");
       entry.setAttribute("data-statusbar-organizer-id", statusBarElement.id);
       statusBarElement.entry = entry;
       entriesContainer.appendChild(entry);
       
       const handle = document.createElement("span");
-      handle.addClass("statusbarOrganizerHandle");
+      handle.addClass("statusbar-organizer-handle");
       handle.addEventListener("mousedown", (event) => handleMouseDown(statusBarElement, event, this.plugin));
       entry.appendChild(handle);
 
@@ -382,14 +382,14 @@ class StatusBarSettingTab extends PluginSettingTab {
       entry.appendChild(titleSpan);
 
       const previewSpan = document.createElement("span");
-      previewSpan.addClass("statusbarOrganizerPreview");
+      previewSpan.addClass("statusbar-organizer-preview");
       if (currentStatus.exists) {
         previewSpan.innerHTML = (statusBarElement.element as Element).innerHTML;
       }
       entry.appendChild(previewSpan);
 
       const visibilitySpan = document.createElement("span");
-      visibilitySpan.addClass("statusbarOrganizerVisibility");
+      visibilitySpan.addClass("statusbar-organizer-visibility");
       visibilitySpan.onclick = (() => {
         if (currentStatus.exists) toggleVisibility(statusBarElement, this.plugin);
         else removeOrphan(statusBarElement, this.plugin);

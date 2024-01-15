@@ -6,7 +6,7 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
-div.statusbarOrganizerEntriesContainer {
+div.statusbar-organizer-container {
   display: flex;
   flex-direction: column;
   gap: 1em;
@@ -14,8 +14,9 @@ div.statusbarOrganizerEntriesContainer {
   width: 100%;
 }
 
-div.statusbarOrganizerEntry {
-  background: #111111;
+div.statusbar-organizer-entry {
+  background: var(--background-primary-alt);
+  color: var(--text-normal);
   border-radius: 0.25em;
   display: grid;
   grid-template-columns: 1.5em 1fr 1fr 4em;
@@ -23,43 +24,43 @@ div.statusbarOrganizerEntry {
   width: 100%;
 }
 
-div.statusbarOrganizerEntry > span {
+div.statusbar-organizer-entry > span {
   display: inline-block;
   height: 1.75em;
   line-height: 0.7;
   padding: 0.5em 0em;
 }
 
-span.statusbarOrganizerHandle {
+span.statusbar-organizer-handle {
   padding: 0 !important;
   cursor: move;
 }
 
-span.statusbarOrganizerHandle::after {
-  content: '.. .. .. ..';
+span.statusbar-organizer-handle::after {
+  content: '·· ·· ·· ··';
   display: inline-block;
   height: 1.75em;
   line-height: 0.25rem;
-  padding: 0.1em 0em;
+  padding: 0.275em 0em;
   width: 1em;
   word-wrap: normal;
 }
 
-span.statusbarOrganizerPreview {
+span.statusbar-organizer-preview {
   border-radius: 0.25em;
   margin-top: 0.2em;
   padding: 0.5em !important;
   font-size: 0.8rem;
-  background: #ffffff10;
+  background: var(--background-secondary-alt);
 }
 
-span.statusbarOrganizerVisibility {
+span.statusbar-organizer-visibility {
   padding-top: 0.3em !important;
   cursor: pointer;
   text-align: right;
 }
 
-div.statusbarOrganizerHidden {
+div.statusbar-organizer-hidden {
   height: 0;
   margin: 0;
   overflow: hidden;
@@ -69,18 +70,24 @@ div.statusbarOrganizerHidden {
   display: none;
 }
 
-div.statusbarOrganizerDrag {
+div.statusbar-organizer-drag {
   position: fixed;
-  color: #dddddd;
-  background: #333333;
+  background: var(--background-modifier-active-hover)
 }
 
-div.statusbarOrganizerClone {
-  color: #999999;
-  background: #222222;
+div.statusbar-organizer-drag > span.statusbar-organizer-preview {
+  opacity: 0.9;
 }
 
-div.statusbarOrganizerDisabled {
-  color: #555555;
-  background: #080808;
+div.statusbar-organizer-clone {
+  background: transparent;
+}
+
+div.statusbar-organizer-clone > span {
+  visibility: hidden !important;
+}
+
+div.statusbar-organizer-disabled {
+  color: var(--text-faint);
+  opacity: 0.75;
 }
