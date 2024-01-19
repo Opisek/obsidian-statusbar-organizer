@@ -291,7 +291,7 @@ class StatusBarSettingTab extends PluginSettingTab {
 				if (Math.abs(dist) > realEntry.offsetHeight * 0.75) {
 					const dir = dist / Math.abs(dist);
 
-					var newIndex = Math.max(0, Math.min(index + dir, entriesContainer.children.length - 1));
+					let newIndex = Math.max(0, Math.min(index + dir, entriesContainer.children.length - 1));
 					if (newIndex != index) {
             const passedEntry = entriesContainer.children[newIndex];
             const passedId = passedEntry.getAttribute("data-statusbar-organizer-id");
@@ -378,7 +378,7 @@ class StatusBarSettingTab extends PluginSettingTab {
         );
 
       const titleSpan = document.createElement("span");
-      titleSpan.innerHTML = formattedName;
+      titleSpan.textContent = formattedName;
       entry.appendChild(titleSpan);
 
       const previewSpan = document.createElement("span");
