@@ -120,6 +120,31 @@ function fixOrder(status: { [key: string]: StatusBarElementStatus }) {
   for (const element of allElements) statusBar.appendChild(element as HTMLElement);
 }
 
+function disableObserver(plugin: StatusBarOrganizer) {
+  plugin.observer.disconnect();
+}
+
+function enableObserver(plugin: StatusBarOrganizer) {
+  plugin.observer.observe(plugin.statusBar, { childList: true });
+}
+
+function spoolFix(plugin: StatusBarOrganizer, timeout: number = 1000) {
+  clearTimeout(plugin.spooler);
+
+  plugin.spooler =
+    window.setTimeout(() => {
+      if (this.mutex) {
+        spoolFix(plugin);
+      } else {
+        plugin.mutex = true;
+        disableObserver(plugin);
+        fixOrder(plugin.settings.status);
+        enableObserver(plugin);
+        plugin.mutex = false;
+      }
+    }, timeout);
+}
+
 interface StatusBarOrganizerSettings {
   status: { [key: string]: StatusBarElementStatus };
 }
@@ -131,17 +156,37 @@ const DEFAULT_SETTINGS: StatusBarOrganizerSettings = {
 export default class StatusBarOrganizer extends Plugin {
 	settings: StatusBarOrganizerSettings;
 
+  observer: MutationObserver;
+  spooler: number;
+  mutex: boolean;
+
+  statusBar: Element;
+
 	async onload() {
 		await this.loadSettings();
 		this.addSettingTab(new StatusBarSettingTab(this.app, this));
 
-    setTimeout(() => {
-      fixOrder(this.settings.status);
-    }, 1000);
+    this.spooler = 0;
+    this.mutex = false;
+    this.statusBar = document.getElementsByClassName("status-bar")[0];
+
+    this.observer = new MutationObserver((list, _) => {
+      if (
+        !this.mutex
+        && list.some(
+          mutation => mutation.type == "childList"
+          && mutation.addedNodes.length > 0
+        )
+      ) {
+        spoolFix(this, 0);
+      }
+    });
+
+    spoolFix(this, 5000);
 	}
 
 	onunload() {
-
+    disableObserver(this);
 	}
 
 	async loadSettings() {
@@ -214,10 +259,9 @@ class StatusBarSettingTab extends PluginSettingTab {
       .sort((a: [any, number], b: [any, number]) => a[1] - b[1])
       .map((x: [StatusBarElement, any]) => x[0]);
 
-    fixOrder(elementStatus);
-
     this.plugin.settings.status = elementStatus;
     await this.plugin.saveSettings();
+    spoolFix(this.plugin, 0);
 
     // Functions
     async function toggleVisibility(statusBarElement: StatusBarElement, plugin: StatusBarOrganizer) {
@@ -283,6 +327,8 @@ class StatusBarSettingTab extends PluginSettingTab {
 
       //  Handle dragging
       function handleMouseMove(event: MouseEvent) {
+        disableObserver(plugin);
+
         fauxEntry.style.left = event.clientX - offsetX + 'px';
         fauxEntry.style.top = event.clientY - offsetY + 'px';
 
@@ -321,6 +367,8 @@ class StatusBarSettingTab extends PluginSettingTab {
               elementStatus[entry.getAttribute("data-statusbar-organizer-id") as string].position = entryIndex;
 					}
 				}
+
+        enableObserver(plugin);
       }
 
       window.addEventListener('mousemove', handleMouseMove); 
