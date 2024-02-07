@@ -116,7 +116,7 @@ function fixOrder(status: { [key: string]: StatusBarElementStatus }) {
 
   const allElements = orderedElements.concat(orphans);
 
-  statusBar.innerHTML = "";
+  statusBar.empty();
   for (const element of allElements) statusBar.appendChild(element as HTMLElement);
 }
 
