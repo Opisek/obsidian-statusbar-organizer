@@ -7,7 +7,7 @@ Once installed, simply enable the plugin and head to the "Status Bar Organizer" 
 
 You'll see an entry per each element of the status bar.
 Using the handle on the left side, you can drag and drop to change the order.
-Using the eye on the right side, you can toggle visibility of the elemente.
+Using the eye on the right side, you can toggle visibility of the elements.
 
 The changes you make will persist, even after restarting Obsidian.
 
