@@ -52,6 +52,7 @@ span.statusbar-organizer-preview {
   padding: 0.5em !important;
   font-size: 0.8rem;
   background: var(--background-secondary-alt);
+  overflow: hidden;
 }
 
 span.statusbar-organizer-visibility {
