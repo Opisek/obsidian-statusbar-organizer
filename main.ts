@@ -116,10 +116,7 @@ function fixOrder(status: { [key: string]: StatusBarElementStatus }) {
 
   const allElements = orderedElements.concat(orphans);
 
-  for (const [i, element] of allElements.entries()) {
-    console.log(i);
-    (element as HTMLElement).style.order = (i + 1).toString();
-  }
+  for (const [i, element] of allElements.entries()) (element as HTMLElement).style.order = (i + 1).toString();
 }
 
 function disableObserver(plugin: StatusBarOrganizer) {
