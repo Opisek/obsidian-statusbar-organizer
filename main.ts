@@ -20,7 +20,7 @@ type StatusBarElement = {
   name: string;
   index: number;
   id: string;
-  element?: Element;
+  element?: HTMLElement;
   entry?: HTMLDivElement;
 };
 
@@ -83,7 +83,7 @@ function getStatusBarElements(): StatusBarElement[] {
       name: name,
       index: index,
       id: id,
-      element: element
+      element: element as HTMLElement
     });
   });
 
@@ -116,8 +116,10 @@ function fixOrder(status: { [key: string]: StatusBarElementStatus }) {
 
   const allElements = orderedElements.concat(orphans);
 
-  statusBar.empty();
-  for (const element of allElements) statusBar.appendChild(element as HTMLElement);
+  for (const [i, element] of allElements.entries()) {
+    console.log(i);
+    (element as HTMLElement).style.order = (i + 1).toString();
+  }
 }
 
 function disableObserver(plugin: StatusBarOrganizer) {
@@ -346,13 +348,11 @@ class StatusBarSettingTab extends PluginSettingTab {
               elementStatus[passedId as string].exists;
 
             const statusBar = document.getElementsByClassName("status-bar")[0];
-            if (statusBarChangeRequired) {
-              statusBar.removeChild(statusBarElement.element as HTMLDivElement)
-              const passedElement = statusBarElements.filter(x => x.id == passedId)[0].element;
-              if (dir > 0)
-                statusBar.insertAfter(statusBarElement.element as HTMLDivElement, passedElement as HTMLDivElement);
-              else
-                statusBar.insertBefore(statusBarElement.element as HTMLDivElement, passedElement as HTMLDivElement);
+            if (statusBarChangeRequired && statusBarElement.element) {
+              const passedElement: HTMLElement = statusBarElements.filter(x => x.id == passedId)[0].element as HTMLElement;
+              const temp = passedElement.style.order;
+              passedElement.style.order = statusBarElement.element.style.order;
+              statusBarElement.element.style.order = temp;
             }
 
 						entriesContainer.removeChild(realEntry);
