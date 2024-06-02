@@ -6,7 +6,7 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
-div.statusbar-organizer-container {
+div.statusbar-organizer-rows-container {
   display: flex;
   flex-direction: column;
   gap: 1em;
@@ -14,7 +14,7 @@ div.statusbar-organizer-container {
   width: 100%;
 }
 
-div.statusbar-organizer-entry {
+div.statusbar-organizer-row {
   background: var(--background-primary-alt);
   color: var(--text-normal);
   border-radius: 0.25em;
@@ -22,21 +22,36 @@ div.statusbar-organizer-entry {
   grid-template-columns: 1.5em 1fr 1fr 4em;
   padding: 0.5em 1em;
   width: 100%;
+  position: relative;
 }
 
-div.statusbar-organizer-entry > span {
+/*
+div.statusbar-organizer-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--background-primary);
+  border-radius: 0.25em;
+  z-index: -1;
+}
+*/
+
+div.statusbar-organizer-row > span {
   display: inline-block;
   height: 1.75em;
   line-height: 0.7;
   padding: 0.5em 0em;
 }
 
-span.statusbar-organizer-handle {
+span.statusbar-organizer-row-handle {
   padding: 0 !important;
   cursor: move;
 }
 
-span.statusbar-organizer-handle::after {
+span.statusbar-organizer-row-handle::after {
   content: '·· ·· ·· ··';
   display: inline-block;
   height: 1.75em;
@@ -46,7 +61,7 @@ span.statusbar-organizer-handle::after {
   word-wrap: normal;
 }
 
-span.statusbar-organizer-preview {
+span.statusbar-organizer-row-preview {
   border-radius: 0.25em;
   margin-top: 0.2em;
   padding: 0.5em !important;
@@ -55,13 +70,40 @@ span.statusbar-organizer-preview {
   overflow: hidden;
 }
 
-span.statusbar-organizer-visibility {
+span.statusbar-organizer-row-visibility {
   padding-top: 0.3em !important;
   cursor: pointer;
   text-align: right;
 }
 
-div.statusbar-organizer-hidden {
+div.statusbar-organizer-row-drag {
+  position: fixed;
+  background: var(--background-modifier-active-hover)
+}
+
+div.statusbar-organizer-row-drag > span.statusbar-organizer-row-preview {
+  opacity: 0.9;
+}
+
+div.statusbar-organizer-row-clone {
+  background: transparent;
+}
+
+div.statusbar-organizer-row-clone > span {
+  visibility: hidden !important;
+}
+
+div.statusbar-organizer-row-disabled {
+  color: var(--color-red);
+  opacity: 0.5;
+}
+
+div.statusbar-organizer-row-hidden:not(div.statusbar-organizer-row-disabled) {
+  color: var(--text-faint);
+  opacity: 0.75;
+}
+
+div.statusbar-organizer-element-hidden {
   height: 0;
   margin: 0;
   overflow: hidden;
@@ -69,26 +111,4 @@ div.statusbar-organizer-hidden {
   visibility: hidden;
   width: 0;
   display: none;
-}
-
-div.statusbar-organizer-drag {
-  position: fixed;
-  background: var(--background-modifier-active-hover)
-}
-
-div.statusbar-organizer-drag > span.statusbar-organizer-preview {
-  opacity: 0.9;
-}
-
-div.statusbar-organizer-clone {
-  background: transparent;
-}
-
-div.statusbar-organizer-clone > span {
-  visibility: hidden !important;
-}
-
-div.statusbar-organizer-disabled {
-  color: var(--text-faint);
-  opacity: 0.75;
 }

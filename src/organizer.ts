@@ -17,9 +17,9 @@ export function fixOrder(plugin: StatusBarOrganizer) {
       const myStatus = status[element.id];
       known.push([element, myStatus.position]);
       if (myStatus.visible)
-        (element.element as HTMLDivElement).removeClass("statusbar-organizer-hidden");
+        (element.element as HTMLDivElement).removeClass("statusbar-organizer-element-hidden");
       else
-        (element.element as HTMLDivElement).addClass("statusbar-organizer-hidden");
+        (element.element as HTMLDivElement).addClass("statusbar-organizer-element-hidden");
     } else {
       orphans.push(element.element);
     }

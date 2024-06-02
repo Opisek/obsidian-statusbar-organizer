@@ -46,6 +46,7 @@ class StatusBarSettingTab extends PluginSettingTab {
 	}
 
   async display() {
-    return showSettings(this.plugin);
+		const {containerEl} = this;
+    return showSettings(this.plugin, containerEl);
   }
 }
