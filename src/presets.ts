@@ -56,7 +56,7 @@ export async function initializePresets(plugin: StatusBarOrganizer, presetsConta
     nameField.addEventListener("change", async () => rename());
     nameField.addEventListener("focusout", async () => rename());
     nameField.addEventListener("input", () => {
-      nameField.setAttribute("size", nameField.value.length.toString());
+      nameField.setAttribute("size", Math.max(nameField.value.length, 1).toString());
     });
     presetEntry.appendChild(renameButton);
 
@@ -139,10 +139,11 @@ async function renamePreset(plugin: StatusBarOrganizer, presetEntry: HTMLDivElem
   let newName = nameField.value.substring(0, 25).trim();
   const otherPresets = plugin.settings.presetsOrder.filter(x => x != presetName);
   newName = (newName == "") ? disambiguate("New Preset", otherPresets) : disambiguate(newName, otherPresets, 2, true);
+  nameField.value = newName;
+  nameField.setAttribute("size", newName.length.toString());
   if (newName == presetName) return presetName;
 
   // Change the name
-  nameField.value = newName;
   if (presetName == plugin.settings.activePreset) plugin.settings.activePreset = newName;
   presetEntry.id = getPresetId(newName);
   plugin.settings.presets[newName] = plugin.settings.presets[presetName];
