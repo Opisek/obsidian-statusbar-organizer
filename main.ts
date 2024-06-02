@@ -41,7 +41,6 @@ export default class StatusBarOrganizer extends Plugin {
 			oldSettings.presets.default = oldSettings.status;
 			delete oldSettings.status;
 			this.settings = oldSettings as StatusBarOrganizerSettings;
-			console.log(JSON.stringify(this.settings));
 			await this.saveSettings();
 		}
 	}

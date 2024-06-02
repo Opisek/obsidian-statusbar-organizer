@@ -101,7 +101,6 @@ async function initializePresets(plugin: StatusBarOrganizer, presetsContainer: H
       }
       nameField.value = newName;
       if (presetName == plugin.settings.activePreset) plugin.settings.activePreset = newName;
-      console.log(plugin.settings.activePreset);
       presetEntry.id = `statusbar-organizer-preset-${generatePresetId(newName)}`;
       plugin.settings.presets[newName] = plugin.settings.presets[presetName];
       delete plugin.settings.presets[presetName];
