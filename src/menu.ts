@@ -11,7 +11,7 @@ export async function showSettings(plugin: StatusBarOrganizer, settingsContainer
 }
 
 async function saveSettings(plugin: StatusBarOrganizer, currentBarStatus: BarStatus) {
-  plugin.settings.status = currentBarStatus;
+  plugin.settings.presets[plugin.settings.activePreset] = currentBarStatus;
   await plugin.saveSettings();
 }
 
@@ -96,7 +96,7 @@ async function initializeUI(plugin: StatusBarOrganizer, settingsContainer: HTMLE
 
 async function consolidateSettingsAndElements(plugin: StatusBarOrganizer) {
   // Initialize status from settings
-  const loadedElementStatus: { [key: string]: StatusBarElementStatus } = plugin.settings.status;
+  const loadedElementStatus: { [key: string]: StatusBarElementStatus } = plugin.settings.presets[plugin.settings.activePreset] || {};
 
   // Aggregate all HTML status bar elements and provisionally assign them default status
   const unorderedStatusBarElements = getStatusBarElements(plugin.statusBar);

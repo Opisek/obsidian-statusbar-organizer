@@ -8,7 +8,10 @@ import { showSettings } from './src/menu';
 import { fixOrder } from './src/organizer';
 
 const DEFAULT_SETTINGS: StatusBarOrganizerSettings = {
-  status: {}
+	activePreset: "default",
+	presets: {
+		"default": {}
+	}
 }
 
 export default class StatusBarOrganizer extends Plugin {
@@ -30,6 +33,16 @@ export default class StatusBarOrganizer extends Plugin {
 
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		
+		// Backwards compatibility with versions < 2.0.0
+		const oldSettings = this.settings as any;
+		if ("status" in oldSettings) {
+			oldSettings.presets.default = oldSettings.status;
+			delete oldSettings.status;
+			this.settings = oldSettings as StatusBarOrganizerSettings;
+			console.log(JSON.stringify(this.settings));
+			await this.saveSettings();
+		}
 	}
 
 	async saveSettings() {

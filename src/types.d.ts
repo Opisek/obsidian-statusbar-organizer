@@ -17,5 +17,6 @@ type BarStatus = {
 }
 
 interface StatusBarOrganizerSettings {
-  status: BarStatus;
+  activePreset: string;
+  presets: { [key: string]: BarStatus }
 }
