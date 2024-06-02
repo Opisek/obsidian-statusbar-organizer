@@ -8,10 +8,11 @@ import { showSettings } from './src/menu';
 import { fixOrder } from './src/organizer';
 
 const DEFAULT_SETTINGS: StatusBarOrganizerSettings = {
-	activePreset: "default",
+	activePreset: "Default",
 	presets: {
-		"default": {}
-	}
+		"Default": {}
+	},
+	presetsOrder: ["Default"]
 }
 
 export default class StatusBarOrganizer extends Plugin {

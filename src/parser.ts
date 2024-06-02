@@ -27,10 +27,10 @@ export function getStatusBarElements(statusBar: Element): StatusBarElement[] {
           ? pluginElementCount[name] + 1
           : 1;
 
-      id = generateId(name, index);
+      id = generateElementId(name, index);
       element.setAttribute("data-statusbar-organizer-id", id);
     } else {
-      const parsed = parseId(id);
+      const parsed = parseElementId(id);
       name = parsed.name;
       index = parsed.index;
     }
@@ -60,7 +60,7 @@ export function getStatusBarElements(statusBar: Element): StatusBarElement[] {
  * @param index 
  * @returns 
  */
-export function generateId(name: string, index: number): string {
+export function generateElementId(name: string, index: number): string {
   return `${name};${index}`;
 }
 
@@ -70,7 +70,7 @@ export function generateId(name: string, index: number): string {
  * @param id 
  * @returns 
  */
-export function parseId(id: string): { name: string, index: number } {
+export function parseElementId(id: string): { name: string, index: number } {
   const parts = id.split(';');
   const index = Number.parseInt(parts.pop() as string);
   const name = parts.join(';');
@@ -79,4 +79,8 @@ export function parseId(id: string): { name: string, index: number } {
     name: name,
     index: index
   };
+}
+
+export function generatePresetId(preset: string): string {
+  return preset.replace(/-/g, '\\-').replace(/\s/g, '-');
 }
