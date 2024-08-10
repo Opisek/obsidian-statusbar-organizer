@@ -29,7 +29,7 @@ export async function showSettings(plugin: StatusBarOrganizer, topContainer: HTM
   await initializeRows(plugin, settingsContainer);
 
   new Setting(topContainer)
-    .setName("Separate fullscreen and regular mode")
+    .setName("Separate fullscreen and windowed mode")
     .setDesc("When enabled, the plugin will remember which preset was active for fullscreen mode and which for windowed mode and switch correspondingly. This is useful for example when you want to display more information in fullscreen mode, like a clock.")
     .addToggle(toggle => toggle
       .setValue(plugin.settings.separateFullscreenPreset)
