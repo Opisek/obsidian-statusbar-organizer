@@ -7,10 +7,18 @@ import { initializeRows } from "./rows";
 export async function showSettings(plugin: StatusBarOrganizer, topContainer: HTMLElement): Promise<void> {
   topContainer.empty();
 
+  // Dummy input used to fix automatically focusing on the first preset's name field
+  const dummyInput = document.createElement("input");
+  dummyInput.setAttribute("autofocus", "autofocus");
+  dummyInput.setAttribute("type", "hidden");
+  topContainer.appendChild(dummyInput);
+
+  // Container for buttons to switch between presets
   const presetsContainer = document.createElement("div");
   presetsContainer.addClass("statusbar-organizer-presets-container");
   topContainer.appendChild(presetsContainer);
 
+  // Container for rows of status bar elements
   const settingsContainer = document.createElement("div");
   settingsContainer.addClass("statusbar-organizer-rows-container-wrapper");
   topContainer.appendChild(settingsContainer);
