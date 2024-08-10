@@ -1,8 +1,10 @@
 import StatusBarOrganizer from "../main";
+import { Setting } from "obsidian";
 import { deepCopy } from "./util";
+import { getActivePreset, initializePresets } from "./presets";
 import { getStatusBarElements, parseElementId } from "./parser";
-import { initializePresets } from "./presets";
 import { initializeRows } from "./rows";
+import { setFullscreenListener } from "./fullscreen";
 
 export async function showSettings(plugin: StatusBarOrganizer, topContainer: HTMLElement): Promise<void> {
   topContainer.empty();
@@ -25,10 +27,26 @@ export async function showSettings(plugin: StatusBarOrganizer, topContainer: HTM
 
   await initializePresets(plugin, presetsContainer, settingsContainer);
   await initializeRows(plugin, settingsContainer);
+
+  new Setting(topContainer)
+    .setName("Separate fullscreen and regular mode")
+    .setDesc("When enabled, the plugin will remember which preset was active for fullscreen mode and which for windowed mode and switch correspondingly. This is useful for example when you want to display more information in fullscreen mode, like a clock.")
+    .addToggle(toggle => toggle
+      .setValue(plugin.settings.separateFullscreenPreset)
+      .onChange(async value => {
+        plugin.settings.separateFullscreenPreset = value;
+        plugin.saveSettings();
+      })
+    )
+
+  setFullscreenListener(async () => {
+    await initializePresets(plugin, presetsContainer, settingsContainer);
+    await initializeRows(plugin, settingsContainer);
+  });
 }
 
 export async function savePreset(plugin: StatusBarOrganizer, currentBarStatus: BarStatus) {
-  plugin.settings.presets[plugin.settings.activePreset] = deepCopy(currentBarStatus);
+  plugin.settings.presets[getActivePreset(plugin)] = deepCopy(currentBarStatus);
   await plugin.saveSettings();
 }
 
@@ -44,7 +62,7 @@ export async function consolidateSettingsAndElements(plugin: StatusBarOrganizer)
   barStatus: BarStatus
 }> {
   // Initialize status from settings
-  const loadedElementStatus: { [key: string]: StatusBarElementStatus } = plugin.settings.presets[plugin.settings.activePreset] || {};
+  const loadedElementStatus: { [key: string]: StatusBarElementStatus } = plugin.settings.presets[getActivePreset(plugin)] || {};
 
   // Aggregate all HTML status bar elements and provisionally assign them default status
   const unorderedStatusBarElements = getStatusBarElements(plugin.statusBar);

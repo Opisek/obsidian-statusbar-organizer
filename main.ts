@@ -5,11 +5,14 @@ import {
 } from 'obsidian';
 import Spooler from './src/spooler';
 import { fixOrder } from './src/organizer';
+import { monitorFullscreen } from 'src/fullscreen';
 import { registerHotkeys } from 'src/hotkeys';
 import { showSettings } from './src/menu';
 
 const DEFAULT_SETTINGS: StatusBarOrganizerSettings = {
 	activePreset: "Default",
+	activeFullscreenPreset: "Default",
+	separateFullscreenPreset: false,
 	presets: {
 		"Default": {}
 	},
@@ -24,11 +27,12 @@ export default class StatusBarOrganizer extends Plugin {
 	async onload() {
 		await this.loadSettings();
 		this.addSettingTab(new StatusBarSettingTab(this.app, this));
+		registerHotkeys(this, this.settings.presetsOrder);
 
-    this.statusBar = document.getElementsByClassName("status-bar")[0];
-    this.spooler = new Spooler(this, fixOrder);
+		this.statusBar = document.getElementsByClassName("status-bar")[0];
+		this.spooler = new Spooler(this, fixOrder);
 
-    registerHotkeys(this, this.settings.presetsOrder);
+    monitorFullscreen(this);
 	}
 
 	onunload() {

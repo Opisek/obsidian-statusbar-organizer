@@ -2,6 +2,7 @@ import StatusBarOrganizer from "../main";
 import { deepCopy } from "./util";
 import { generatePresetId } from "./parser";
 import { initializeRows } from "./rows";
+import { isFullscreen } from "./fullscreen";
 import { registerHotkeys } from "./hotkeys";
 import { setIcon } from "obsidian";
 
@@ -19,11 +20,11 @@ export async function initializePresets(plugin: StatusBarOrganizer, presetsConta
   if (plugin.settings.presetsOrder.length == 0) {
     plugin.settings.presetsOrder.push("Default");
     plugin.settings.presets["Default"] = {};
-    plugin.settings.activePreset = "Default";
+    setActivePreset(plugin, "Default");
     await plugin.saveSettings();
   }
-  if (!(plugin.settings.activePreset in plugin.settings.presets)) {
-    plugin.settings.activePreset = plugin.settings.presetsOrder[0];
+  if (!(getActivePreset(plugin) in plugin.settings.presets)) {
+    setActivePreset(plugin, plugin.settings.presetsOrder[0]);
     await plugin.saveSettings();
   }
 
@@ -33,7 +34,7 @@ export async function initializePresets(plugin: StatusBarOrganizer, presetsConta
     const presetEntry = document.createElement("div");
     presetEntry.addClass("statusbar-organizer-preset");
     presetEntry.id = getPresetId(presetName);
-    if (presetName == plugin.settings.activePreset) presetEntry.addClass("statusbar-organizer-preset-active");
+    if (presetName == getActivePreset(plugin)) presetEntry.addClass("statusbar-organizer-preset-active");
     presetsContainer.appendChild(presetEntry);
 
     const nameField = document.createElement("input");
@@ -99,9 +100,9 @@ export async function initializePresets(plugin: StatusBarOrganizer, presetsConta
  */
 async function addPreset(plugin: StatusBarOrganizer, presetsContainer: HTMLDivElement, settingsContainer: HTMLDivElement) {
   const presetName = disambiguate("New Preset", plugin.settings.presetsOrder);
-  plugin.settings.presets[presetName] = deepCopy(plugin.settings.presets[plugin.settings.activePreset]);
+  plugin.settings.presets[presetName] = deepCopy(plugin.settings.presets[getActivePreset(plugin)]);
   plugin.settings.presetsOrder.push(presetName);
-  plugin.settings.activePreset = presetName;
+  setActivePreset(plugin, presetName);
   await plugin.saveSettings();
   await initializePresets(plugin, presetsContainer, settingsContainer);
 }
@@ -116,10 +117,12 @@ async function addPreset(plugin: StatusBarOrganizer, presetsContainer: HTMLDivEl
  */
 async function deletePreset(plugin: StatusBarOrganizer, presetsContainer: HTMLDivElement, settingsContainer: HTMLDivElement, presetName: string) {
   // Switch to the closest preset
-  const currentIndex = plugin.settings.presetsOrder.indexOf(presetName);
-  if (currentIndex > 0) plugin.settings.activePreset = plugin.settings.presetsOrder[currentIndex - 1];
-  else if (currentIndex < plugin.settings.presetsOrder.length - 1) plugin.settings.activePreset = plugin.settings.presetsOrder[currentIndex + 1];
-  else plugin.settings.activePreset = "Default";
+  if (getActivePreset(plugin) == presetName) {
+    const currentIndex = plugin.settings.presetsOrder.indexOf(presetName);
+    if (currentIndex > 0) setActivePreset(plugin, plugin.settings.presetsOrder[currentIndex - 1]);
+    else if (currentIndex < plugin.settings.presetsOrder.length - 1) setActivePreset(plugin, plugin.settings.presetsOrder[currentIndex + 1]);
+    else setActivePreset(plugin, "Default");
+  }
 
   // Delete preset
   delete plugin.settings.presets[presetName];
@@ -149,12 +152,11 @@ async function renamePreset(plugin: StatusBarOrganizer, presetEntry: HTMLDivElem
   if (newName == presetName) return presetName;
 
   // Change the name
-  if (presetName == plugin.settings.activePreset) plugin.settings.activePreset = newName;
   presetEntry.id = getPresetId(newName);
   plugin.settings.presets[newName] = plugin.settings.presets[presetName];
   delete plugin.settings.presets[presetName];
   plugin.settings.presetsOrder = plugin.settings.presetsOrder.map(x => x == presetName ? newName : x);
-  plugin.settings.activePreset = newName;
+  setActivePreset(plugin, newName);
 
   await plugin.saveSettings();
   return newName;
@@ -164,18 +166,33 @@ async function renamePreset(plugin: StatusBarOrganizer, presetEntry: HTMLDivElem
  * Select a different preset in the menu and switch to it.
  */
 async function selectPreset(plugin: StatusBarOrganizer, presetEntry: HTMLDivElement, presetName: string, settingsContainer: HTMLDivElement) {
-  document.getElementById(getPresetId(plugin.settings.activePreset))?.removeClass("statusbar-organizer-preset-active");
+  document.getElementById(getPresetId(getActivePreset(plugin)))?.removeClass("statusbar-organizer-preset-active");
   presetEntry.addClass("statusbar-organizer-preset-active");
-  await switchPreset(plugin, presetName)
+  await setActivePreset(plugin, presetName)
   await initializeRows(plugin, settingsContainer);
 }
 
 /**
  * Switch to a different preset.
  */
-export async function switchPreset(plugin: StatusBarOrganizer, presetName: string) {
-  plugin.settings.activePreset = presetName;
+export async function setActivePreset(plugin: StatusBarOrganizer, presetName: string) {
+  if (isFullscreen()) {
+    plugin.settings.activeFullscreenPreset = presetName;
+  } else {
+    plugin.settings.activePreset = presetName;
+  }
   await plugin.saveSettings();
+}
+
+/**
+ * Get the currently active preset.
+ */
+export function getActivePreset(plugin: StatusBarOrganizer) {
+  if (isFullscreen()) {
+    return plugin.settings.activeFullscreenPreset;
+  } else {
+    return plugin.settings.activePreset;
+  }
 }
 
 /**
