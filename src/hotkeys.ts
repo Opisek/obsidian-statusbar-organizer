@@ -1,6 +1,6 @@
 import StatusBarOrganizer from "main";
 import { fixOrder } from "./organizer";
-import { switchPreset } from "./presets";
+import { setActivePreset } from "./presets";
 
 function commandCallback(plugin: StatusBarOrganizer, index: number) {
     return (checking: boolean) => {
@@ -8,7 +8,7 @@ function commandCallback(plugin: StatusBarOrganizer, index: number) {
 
         if (presets.length <= index) return false;
         if (!checking) {
-            switchPreset(plugin, presets[index]);
+            setActivePreset(plugin, presets[index]);
             fixOrder(plugin);
         }
     }

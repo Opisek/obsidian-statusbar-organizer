@@ -1,9 +1,10 @@
 import StatusBarOrganizer from "../main";
 import { getStatusBarElements } from "./parser";
+import { getActivePreset } from "./presets";
 
 export function fixOrder(plugin: StatusBarOrganizer) {
   const elements = getStatusBarElements(plugin.statusBar);
-  const status = plugin.settings.presets[plugin.settings.activePreset];
+  const status = plugin.settings.presets[getActivePreset(plugin)];
 
   // Elements with known position
   const known = [];

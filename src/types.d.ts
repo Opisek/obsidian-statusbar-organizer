@@ -18,6 +18,8 @@ type BarStatus = {
 
 interface StatusBarOrganizerSettings {
   activePreset: string;
+	activeFullscreenPreset: string,
+	separateFullscreenPreset: boolean,
   presets: { [key: string]: BarStatus }
   presetsOrder: string[];
 }
