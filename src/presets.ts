@@ -2,6 +2,7 @@ import StatusBarOrganizer from "../main";
 import { deepCopy } from "./util";
 import { generatePresetId } from "./parser";
 import { initializeRows } from "./rows";
+import { registerHotkeys } from "./hotkeys";
 import { setIcon } from "obsidian";
 
 /**
@@ -74,7 +75,7 @@ export async function initializePresets(plugin: StatusBarOrganizer, presetsConta
 
     // Preset Switching
     const select = async () => {
-      await switchPreset(plugin, presetEntry, presetName, settingsContainer)
+      await selectPreset(plugin, presetEntry, presetName, settingsContainer)
     }
     presetEntry.addEventListener("click", async () => select());
   }
@@ -85,6 +86,8 @@ export async function initializePresets(plugin: StatusBarOrganizer, presetsConta
   setIcon(newPresetEntry, "plus");
   newPresetEntry.addEventListener("click", () => addPreset(plugin, presetsContainer, settingsContainer));
   presetsContainer.appendChild(newPresetEntry);
+
+  registerHotkeys(plugin, plugin.settings.presetsOrder);
 }
 
 /**
@@ -158,14 +161,21 @@ async function renamePreset(plugin: StatusBarOrganizer, presetEntry: HTMLDivElem
 }
 
 /**
- * Switch to a different preset.
-*/
-async function switchPreset(plugin: StatusBarOrganizer, presetEntry: HTMLDivElement, presetName: string, settingsContainer: HTMLDivElement) {
+ * Select a different preset in the menu and switch to it.
+ */
+async function selectPreset(plugin: StatusBarOrganizer, presetEntry: HTMLDivElement, presetName: string, settingsContainer: HTMLDivElement) {
   document.getElementById(getPresetId(plugin.settings.activePreset))?.removeClass("statusbar-organizer-preset-active");
   presetEntry.addClass("statusbar-organizer-preset-active");
+  await switchPreset(plugin, presetName)
+  await initializeRows(plugin, settingsContainer);
+}
+
+/**
+ * Switch to a different preset.
+ */
+export async function switchPreset(plugin: StatusBarOrganizer, presetName: string) {
   plugin.settings.activePreset = presetName;
   await plugin.saveSettings();
-  await initializeRows(plugin, settingsContainer);
 }
 
 /**
