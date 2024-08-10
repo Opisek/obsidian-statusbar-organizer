@@ -1,4 +1,5 @@
 import StatusBarOrganizer from "../main";
+import { deepCopy } from "./util";
 import { getStatusBarElements, parseElementId } from "./parser";
 import { initializePresets } from "./presets";
 import { initializeRows } from "./rows";
@@ -19,7 +20,7 @@ export async function showSettings(plugin: StatusBarOrganizer, topContainer: HTM
 }
 
 export async function savePreset(plugin: StatusBarOrganizer, currentBarStatus: BarStatus) {
-  plugin.settings.presets[plugin.settings.activePreset] = currentBarStatus;
+  plugin.settings.presets[plugin.settings.activePreset] = deepCopy(currentBarStatus);
   await plugin.saveSettings();
 }
 

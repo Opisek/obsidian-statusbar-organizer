@@ -1,7 +1,8 @@
 import StatusBarOrganizer from "../main";
+import { deepCopy } from "./util";
 import { generatePresetId } from "./parser";
-import { setIcon } from "obsidian";
 import { initializeRows } from "./rows";
+import { setIcon } from "obsidian";
 
 /**
  * Set up the presets in the settings menu.
@@ -94,7 +95,7 @@ export async function initializePresets(plugin: StatusBarOrganizer, presetsConta
  */
 async function addPreset(plugin: StatusBarOrganizer, presetsContainer: HTMLDivElement, settingsContainer: HTMLDivElement) {
   const presetName = disambiguate("New Preset", plugin.settings.presetsOrder);
-  plugin.settings.presets[presetName] = JSON.parse(JSON.stringify(plugin.settings.presets[plugin.settings.activePreset]));
+  plugin.settings.presets[presetName] = deepCopy(plugin.settings.presets[plugin.settings.activePreset]);
   plugin.settings.presetsOrder.push(presetName);
   plugin.settings.activePreset = presetName;
   await plugin.saveSettings();
