@@ -4,8 +4,9 @@ import {
   PluginSettingTab,
 } from 'obsidian';
 import Spooler from './src/spooler';
-import { showSettings } from './src/menu';
 import { fixOrder } from './src/organizer';
+import { registerHotkeys } from 'src/hotkeys';
+import { showSettings } from './src/menu';
 
 const DEFAULT_SETTINGS: StatusBarOrganizerSettings = {
 	activePreset: "Default",
@@ -17,8 +18,8 @@ const DEFAULT_SETTINGS: StatusBarOrganizerSettings = {
 
 export default class StatusBarOrganizer extends Plugin {
 	settings: StatusBarOrganizerSettings;
-  statusBar: Element;
-  spooler: Spooler;
+	statusBar: Element;
+	spooler: Spooler;
 
 	async onload() {
 		await this.loadSettings();
@@ -26,6 +27,8 @@ export default class StatusBarOrganizer extends Plugin {
 
     this.statusBar = document.getElementsByClassName("status-bar")[0];
     this.spooler = new Spooler(this, fixOrder);
+
+    registerHotkeys(this, this.settings.presetsOrder);
 	}
 
 	onunload() {
