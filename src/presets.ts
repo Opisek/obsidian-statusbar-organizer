@@ -52,10 +52,11 @@ export async function initializePresets(plugin: StatusBarOrganizer, presetsConta
       nameField.focus();
     });
     const rename = async () => {
+      nameField.blur();
       presetName = await renamePreset(plugin, presetEntry, nameField, presetName);
     }
     nameField.addEventListener("change", async () => rename());
-    nameField.addEventListener("focusout", async () => rename());
+    //nameField.addEventListener("focusout", async () => await rename());
     nameField.addEventListener("input", () => {
       nameField.setAttribute("size", Math.max(nameField.value.length, 1).toString());
     });
