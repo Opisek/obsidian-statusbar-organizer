@@ -5,9 +5,9 @@ import {
 } from 'obsidian';
 import Spooler from './src/spooler';
 import { fixOrder } from './src/organizer';
+import { monitorFullscreen } from 'src/fullscreen';
 import { registerHotkeys } from 'src/hotkeys';
 import { showSettings } from './src/menu';
-import { moniterFullscreen } from 'src/fullscreen';
 
 const DEFAULT_SETTINGS: StatusBarOrganizerSettings = {
 	activePreset: "Default",
@@ -32,7 +32,7 @@ export default class StatusBarOrganizer extends Plugin {
 		this.statusBar = document.getElementsByClassName("status-bar")[0];
 		this.spooler = new Spooler(this, fixOrder);
 
-    moniterFullscreen(this);
+    monitorFullscreen(this);
 	}
 
 	onunload() {

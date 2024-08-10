@@ -23,3 +23,8 @@ interface StatusBarOrganizerSettings {
   presets: { [key: string]: BarStatus }
   presetsOrder: string[];
 }
+
+type ElectronWindow = {
+  addListener: (event: string, callback: () => void) => void;
+  isFullScreen: () => boolean;
+}

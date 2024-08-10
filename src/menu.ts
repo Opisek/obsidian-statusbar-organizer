@@ -1,9 +1,10 @@
 import StatusBarOrganizer from "../main";
-import { deepCopy } from "./util";
-import { getStatusBarElements, parseElementId } from "./parser";
-import { getActivePreset, initializePresets } from "./presets";
-import { initializeRows } from "./rows";
 import { Setting } from "obsidian";
+import { deepCopy } from "./util";
+import { getActivePreset, initializePresets } from "./presets";
+import { getStatusBarElements, parseElementId } from "./parser";
+import { initializeRows } from "./rows";
+import { setFullscreenListener } from "./fullscreen";
 
 export async function showSettings(plugin: StatusBarOrganizer, topContainer: HTMLElement): Promise<void> {
   topContainer.empty();
@@ -29,7 +30,7 @@ export async function showSettings(plugin: StatusBarOrganizer, topContainer: HTM
 
   new Setting(topContainer)
     .setName("Separate fullscreen and regular mode")
-    .setDesc("When enabled, the plugin will remember which preset was active for fullscreen mode and which for regular mode and switch correspondingly. This is useful for example when you want to display more information in fullscreen mode, like a clock.")
+    .setDesc("When enabled, the plugin will remember which preset was active for fullscreen mode and which for windowed mode and switch correspondingly. This is useful for example when you want to display more information in fullscreen mode, like a clock.")
     .addToggle(toggle => toggle
       .setValue(plugin.settings.separateFullscreenPreset)
       .onChange(async value => {
@@ -37,6 +38,11 @@ export async function showSettings(plugin: StatusBarOrganizer, topContainer: HTM
         plugin.saveSettings();
       })
     )
+
+  setFullscreenListener(async () => {
+    await initializePresets(plugin, presetsContainer, settingsContainer);
+    await initializeRows(plugin, settingsContainer);
+  });
 }
 
 export async function savePreset(plugin: StatusBarOrganizer, currentBarStatus: BarStatus) {
