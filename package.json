@@ -1,11 +1,11 @@
 {
 	"name": "obsidian-statusbar-organizer",
-	"version": "2.1.0",
+	"version": "2.1.1",
 	"description": "Arrange and hide status bar elements.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
-		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production && node version-bump.mjs",
 		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},
 	"keywords": [],
