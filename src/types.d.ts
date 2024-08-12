@@ -9,11 +9,14 @@ type StatusBarElement = {
 type StatusBarElementStatus = {
   position: number;
   visible: boolean;
-  exists: boolean;
 }
 
 type BarStatus = {
   [key: string]: StatusBarElementStatus
+}
+
+type ExistsStatus = {
+  [key: string]: boolean
 }
 
 interface StatusBarOrganizerSettings {
@@ -22,9 +25,20 @@ interface StatusBarOrganizerSettings {
 	separateFullscreenPreset: boolean,
   presets: { [key: string]: BarStatus }
   presetsOrder: string[];
+  version: string;
 }
 
 type ElectronWindow = {
   addListener: (event: string, callback: () => void) => void;
   isFullScreen: () => boolean;
 }
+
+type Version = {
+  major: number;
+  minor: number;
+  patch: number;
+}
+
+type Upgrades = Map<number, Map<number, Map<number, Upgrade>>>;
+type Upgrade = (settings: StatusBarOrganizerSettings) => void;
+type VersionUpgrade = { version: Version, upgrade: Upgrade };

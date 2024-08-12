@@ -16,7 +16,7 @@ export async function initializeRows(plugin: StatusBarOrganizer, settingsContain
   dragging = false;
 
   // Get a definite list of menu row entries
-  const { rows, barStatus } = await consolidateSettingsAndElements(plugin);
+  const { rows, barStatus, existsStatus } = await consolidateSettingsAndElements(plugin);
 
   // Initialize the container
   const rowsContainer = document.createElement("div");
@@ -35,10 +35,11 @@ export async function initializeRows(plugin: StatusBarOrganizer, settingsContain
   // Generate visual rows
   for (const row of rows) {
     const currentStatus = barStatus[row.id];
+    const currentExists = existsStatus[row.id];
 
     const entry = document.createElement("div");
     entry.addClass("statusbar-organizer-row");
-    if (!currentStatus.exists) entry.addClass("statusbar-organizer-row-disabled");
+    if (!currentExists) entry.addClass("statusbar-organizer-row-disabled");
     if (!currentStatus.visible) entry.addClass("statusbar-organizer-row-hidden");
     entry.setAttribute("data-statusbar-organizer-id", row.id);
     row.entry = entry;
@@ -47,7 +48,7 @@ export async function initializeRows(plugin: StatusBarOrganizer, settingsContain
     const handle = document.createElement("span");
     handle.addClass("statusbar-organizer-row-handle");
     handle.addEventListener("mousedown", (event) => 
-      handleMouseDown(event, plugin, barStatus, settingsContainer, rowsContainer, rows, row)
+      handleMouseDown(event, plugin, barStatus, existsStatus, settingsContainer, rowsContainer, rows, row)
     );
     entry.appendChild(handle);
 
@@ -68,7 +69,7 @@ export async function initializeRows(plugin: StatusBarOrganizer, settingsContain
 
     const previewSpan = document.createElement("span");
     previewSpan.addClass("statusbar-organizer-row-preview");
-    if (currentStatus.exists) {
+    if (currentExists) {
       previewSpan.innerHTML = (row.element as Element).innerHTML;
     }
     entry.appendChild(previewSpan);
@@ -76,10 +77,10 @@ export async function initializeRows(plugin: StatusBarOrganizer, settingsContain
     const visibilitySpan = document.createElement("span");
     visibilitySpan.addClass("statusbar-organizer-row-visibility");
     visibilitySpan.onclick = (() => {
-      if (currentStatus.exists) toggleVisibility(plugin, barStatus, row);
+      if (currentExists) toggleVisibility(plugin, barStatus, row);
       else removeOrphan(plugin, rowsContainer, barStatus, row);
     });
-    setIcon(visibilitySpan, currentStatus.exists ? (currentStatus.visible ? "eye" : "eye-off") : "trash-2");
+    setIcon(visibilitySpan, currentExists ? (currentStatus.visible ? "eye" : "eye-off") : "trash-2");
     entry.appendChild(visibilitySpan);
   }
 
@@ -147,7 +148,14 @@ async function removeOrphan(plugin: StatusBarOrganizer, rowsContainer: HTMLDivEl
  * @param rowsContainer 
  * @param row 
  */
-function cloneRow(settingsContainer: HTMLDivElement, barStatus: BarStatus, rowsContainer: HTMLDivElement, event: MouseEvent, row: StatusBarElement): {
+function cloneRow(
+  settingsContainer: HTMLDivElement,
+  barStatus: BarStatus,
+  existsStatus: ExistsStatus,
+  rowsContainer: HTMLDivElement,
+  event: MouseEvent,
+  row: StatusBarElement
+):{
   stationaryRow: HTMLDivElement,
   movableRow: HTMLDivElement,
   offsetX: number,
@@ -163,7 +171,7 @@ function cloneRow(settingsContainer: HTMLDivElement, barStatus: BarStatus, rowsC
 
   fauxEntry.addClass("statusbar-organizer-row");
   fauxEntry.addClass("statusbar-organizer-row-drag");
-  if (!barStatus[row.id].exists) fauxEntry.addClass("statusbar-organizer-row-disabled");
+  if (!existsStatus[row.id]) fauxEntry.addClass("statusbar-organizer-row-disabled");
   if (!barStatus[row.id].visible) fauxEntry.addClass("statusbar-organizer-row-hidden");
 
   //const fauxEntryBackground = document.createElement("div");
@@ -249,13 +257,21 @@ function calculateRowIndex(event: MouseEvent, rowsContainer: HTMLDivElement, mov
  * @param stationaryRow 
  * @param newIndex 
  */
-function handlePositionChange(barStatus: BarStatus, rowsContainer: HTMLDivElement, rows: StatusBarElement[], row: StatusBarElement, stationaryRow: HTMLDivElement, newIndex: number) {
+function handlePositionChange(
+  barStatus: BarStatus,
+  existsStatus: ExistsStatus,
+  rowsContainer: HTMLDivElement,
+  rows: StatusBarElement[],
+  row: StatusBarElement,
+  stationaryRow: HTMLDivElement,
+  newIndex: number
+) {
   // Determine which other row was passed through dragging
   const passedEntry = rowsContainer.children[newIndex];
   const passedId = passedEntry.getAttribute("data-statusbar-organizer-id");
   const statusBarChangeRequired =
-    barStatus[row.id].exists &&
-    barStatus[passedId as string].exists;
+    existsStatus[row.id] &&
+    existsStatus[passedId as string];
 
   // Swap the positions of the two status bar elements
   if (statusBarChangeRequired && row.element) {
@@ -289,12 +305,21 @@ function handlePositionChange(barStatus: BarStatus, rowsContainer: HTMLDivElemen
  * @param row 
  * @returns 
  */
-function handleMouseDown(event: MouseEvent, plugin: StatusBarOrganizer, barStatus: BarStatus, settingsContainer: HTMLDivElement, rowsContainer: HTMLDivElement, rows: StatusBarElement[], row: StatusBarElement) {
+function handleMouseDown(
+  event: MouseEvent,
+  plugin: StatusBarOrganizer,
+  barStatus: BarStatus,
+  existsStatus: ExistsStatus,
+  settingsContainer: HTMLDivElement,
+  rowsContainer: HTMLDivElement,
+  rows: StatusBarElement[],
+  row: StatusBarElement
+) {
   if (dragging) return;
   dragging = true;
 
   // Generate a draggable clone of the row
-  let { stationaryRow, movableRow, offsetX, offsetY, index } = cloneRow(settingsContainer, barStatus, rowsContainer, event, row);
+  let { stationaryRow, movableRow, offsetX, offsetY, index } = cloneRow(settingsContainer, barStatus, existsStatus, rowsContainer, event, row);
 
   //  Handle dragging
   function handleMouseMove(event: MouseEvent) {
@@ -302,7 +327,7 @@ function handleMouseDown(event: MouseEvent, plugin: StatusBarOrganizer, barStatu
 
     const newIndex = calculateRowIndex(event, rowsContainer, movableRow, stationaryRow, offsetX, offsetY, index);
     if (newIndex != index) {
-      handlePositionChange(barStatus, rowsContainer, rows, row, stationaryRow, newIndex);
+      handlePositionChange(barStatus, existsStatus, rowsContainer, rows, row, stationaryRow, newIndex);
       index = newIndex;
     }
 

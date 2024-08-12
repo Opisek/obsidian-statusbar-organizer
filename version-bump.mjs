@@ -12,3 +12,8 @@ writeFileSync("manifest.json", JSON.stringify(manifest, null, "\t"));
 let versions = JSON.parse(readFileSync("versions.json", "utf8"));
 versions[targetVersion] = minAppVersion;
 writeFileSync("versions.json", JSON.stringify(versions, null, "\t"));
+
+// update main.js with target version
+let main = readFileSync("main.js", "utf8");
+main = main.replaceAll("CURRENT_VERSION", targetVersion);
+writeFileSync("main.js", main);

@@ -8,6 +8,7 @@ import { fixOrder } from './src/organizer';
 import { monitorFullscreen } from 'src/fullscreen';
 import { registerHotkeys } from 'src/hotkeys';
 import { showSettings } from './src/menu';
+import { upgrade } from 'src/upgrade';
 
 const DEFAULT_SETTINGS: StatusBarOrganizerSettings = {
 	activePreset: "Default",
@@ -16,7 +17,8 @@ const DEFAULT_SETTINGS: StatusBarOrganizerSettings = {
 	presets: {
 		"Default": {}
 	},
-	presetsOrder: ["Default"]
+	presetsOrder: ["Default"],
+	version: "CURRENT_VERSION"
 }
 
 export default class StatusBarOrganizer extends Plugin {
@@ -40,16 +42,12 @@ export default class StatusBarOrganizer extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-		
-		// Backwards compatibility with versions < 2.0.0
-		const oldSettings = this.settings as any;
-		if ("status" in oldSettings) {
-			oldSettings.presets.default = oldSettings.status;
-			delete oldSettings.status;
-			this.settings = oldSettings as StatusBarOrganizerSettings;
-			await this.saveSettings();
-		}
+		const savedData = await this.loadData();
+		if (Object.keys(savedData).length != 0 && !("version" in savedData)) savedData["version"] = "0.0.0";
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, savedData);
+
+		upgrade(this.settings);
+		await this.saveSettings();
 	}
 
 	async saveSettings() {
