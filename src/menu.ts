@@ -5,6 +5,7 @@ import { getActivePreset, initializePresets } from "./presets";
 import { getStatusBarElements, parseElementId } from "./parser";
 import { initializeRows } from "./rows";
 import { setFullscreenListener } from "./fullscreen";
+import { exists } from "fs";
 
 export async function showSettings(plugin: StatusBarOrganizer, topContainer: HTMLElement): Promise<void> {
   topContainer.empty();
@@ -59,7 +60,8 @@ export async function savePreset(plugin: StatusBarOrganizer, currentBarStatus: B
  */
 export async function consolidateSettingsAndElements(plugin: StatusBarOrganizer): Promise<{
   rows: StatusBarElement[],
-  barStatus: BarStatus
+  barStatus: BarStatus,
+  existsStatus: ExistsStatus
 }> {
   // Initialize status from settings
   const loadedElementStatus: { [key: string]: StatusBarElementStatus } = plugin.settings.presets[getActivePreset(plugin)] || {};
@@ -70,16 +72,16 @@ export async function consolidateSettingsAndElements(plugin: StatusBarOrganizer)
   for (const [index, statusBarElement] of unorderedStatusBarElements.entries()) {
     defaultElementStatus[statusBarElement.id] = {
       position: index,
-      visible: true,
-      exists: true
+      visible: true
     };
   }
 
   // Check which known elements are missing from the current status bar
   const barStatus: BarStatus = {};
+  const existsStatus: ExistsStatus = {};
   for (const [index, status] of Object.entries(loadedElementStatus)) {
-    status.exists = index in defaultElementStatus;
     barStatus[index] = status; 
+    existsStatus[index] = index in defaultElementStatus;
   }
 
   // Append all previously unknown elements to the end of the list
@@ -89,11 +91,12 @@ export async function consolidateSettingsAndElements(plugin: StatusBarOrganizer)
     const status = defaultElementStatus[element.id];
     status.position = insertPosition++;
     barStatus[element.id] = status;
+    existsStatus[element.id] = true;
   }
 
   // Serialize elements missing from the status bar
   const disabledStatusBarElements: StatusBarElement[] = Object.keys(loadedElementStatus)
-    .filter(x => !barStatus[x].exists)
+    .filter(x => !existsStatus[x])
     .map(x => {
       const parsed = parseElementId(x);
       return {
@@ -116,6 +119,7 @@ export async function consolidateSettingsAndElements(plugin: StatusBarOrganizer)
 
   return {
     rows: rows,
-    barStatus: barStatus
+    barStatus: barStatus,
+    existsStatus: existsStatus
   }
 }

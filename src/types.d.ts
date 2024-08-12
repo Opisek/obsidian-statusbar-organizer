@@ -9,11 +9,14 @@ type StatusBarElement = {
 type StatusBarElementStatus = {
   position: number;
   visible: boolean;
-  exists: boolean;
 }
 
 type BarStatus = {
   [key: string]: StatusBarElementStatus
+}
+
+type ExistsStatus = {
+  [key: string]: boolean
 }
 
 interface StatusBarOrganizerSettings {
