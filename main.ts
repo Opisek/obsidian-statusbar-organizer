@@ -42,7 +42,8 @@ export default class StatusBarOrganizer extends Plugin {
 	}
 
 	async loadSettings() {
-		const savedData = await this.loadData();
+		const savedData = await this.loadData() || {};
+    console.log(savedData)
 		if (Object.keys(savedData).length != 0 && !("version" in savedData)) savedData["version"] = "0.0.0";
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, savedData);
 
