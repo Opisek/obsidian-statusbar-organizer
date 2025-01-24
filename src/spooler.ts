@@ -27,7 +27,7 @@ export default class Spooler {
       }
     });
 
-    this.spoolFix(5000);
+    this.spoolFix(0); // In case of issues, try increasing this again.
   }
 
   /**
