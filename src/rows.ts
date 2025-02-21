@@ -64,6 +64,7 @@ export async function initializeRows(plugin: StatusBarOrganizer, settingsContain
       );
 
     const titleSpan = document.createElement("span");
+    titleSpan.addClass("statusbar-organizer-row-title");
     titleSpan.textContent = formattedName;
     entry.appendChild(titleSpan);
 
