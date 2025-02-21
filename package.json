@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-statusbar-organizer",
-	"version": "2.1.3",
+	"version": "2.1.4",
 	"description": "Arrange and hide status bar elements.",
 	"main": "main.js",
 	"scripts": {
