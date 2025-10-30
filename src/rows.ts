@@ -181,9 +181,13 @@ function cloneRow(
 
   settingsContainer.appendChild(fauxEntry);
 
+  // Get position of the container for correct absolute left/top calculation
+  const containerX = settingsContainer.getBoundingClientRect().left;
+  const containerY = settingsContainer.getBoundingClientRect().top;
+
   // Position faux element beneath the mouse cursor 
-  fauxEntry.style.left = realEntry.getBoundingClientRect().left + 'px';
-  fauxEntry.style.top = realEntry.getBoundingClientRect().top + 'px';
+  fauxEntry.style.left = realEntry.getBoundingClientRect().left - containerX + 'px';
+  fauxEntry.style.top = realEntry.getBoundingClientRect().top - containerY + 'px';
   fauxEntry.style.width = realEntry.offsetWidth + 'px';
 
   // Copy all children over
@@ -202,8 +206,8 @@ function cloneRow(
   return {
     stationaryRow: realEntry,
     movableRow: fauxEntry,
-    offsetX: offsetX,
-    offsetY: offsetY,
+    offsetX: offsetX + containerX,
+    offsetY: offsetY + containerY,
     index: index
   }
 }

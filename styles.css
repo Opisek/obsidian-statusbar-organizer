@@ -13,6 +13,7 @@ div.statusbar-organizer-presets-container {
 
 div.statusbar-organizer-rows-container-wrapper {
   width: 100%;
+  position: relative;
 }
 
 div.statusbar-organizer-rows-container {
@@ -149,7 +150,7 @@ span.statusbar-organizer-row-visibility {
 }
 
 div.statusbar-organizer-row-drag {
-  position: fixed;
+  position: absolute;
   background: var(--background-modifier-active-hover)
 }
 
